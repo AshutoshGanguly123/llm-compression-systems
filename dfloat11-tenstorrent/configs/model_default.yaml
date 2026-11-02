@@ -1,0 +1,8 @@
+model_name: "Llama-3.2-1B-Instruct"
+hf_model_path: ""
+tt_metal_home: "/home/ashutoshganguly/tt-metal"
+device_id: 0
+num_layers: null
+max_seq_len: 1024
+batch_size: 1
+instruct: true

@@ -1,0 +1,43 @@
+{
+  "experiment_id": "experiment_7_bits",
+  "timestamp": "2025-12-13T03:50:27.174955",
+  "num_bits_zeroed": 7,
+  "model_config": {
+    "model_name": "meta-llama/Llama-3.1-8B-Instruct",
+    "device": "cuda",
+    "dtype": "float16"
+  },
+  "results": {
+    "hellaswag": {
+      "alias": "hellaswag",
+      "acc,none": 0.5791674965146385,
+      "acc_stderr,none": 0.004926837572202165,
+      "acc_norm,none": 0.7818163712407887,
+      "acc_norm_stderr,none": 0.0041216867002386096
+    },
+    "piqa": {
+      "alias": "piqa",
+      "acc,none": 0.8008705114254625,
+      "acc_stderr,none": 0.00931739189370684,
+      "acc_norm,none": 0.8052230685527747,
+      "acc_norm_stderr,none": 0.009240006693317725
+    },
+    "arc_easy": {
+      "alias": "arc_easy",
+      "acc,none": 0.8228114478114478,
+      "acc_stderr,none": 0.007834949209841097,
+      "acc_norm,none": 0.8055555555555556,
+      "acc_norm_stderr,none": 0.008121078550852038
+    },
+    "winogrande": {
+      "alias": "winogrande",
+      "acc,none": 0.7466456195737964,
+      "acc_stderr,none": 0.012223754434233621
+    },
+    "boolq": {
+      "alias": "boolq",
+      "acc,none": 0.8617737003058104,
+      "acc_stderr,none": 0.006036490185165252
+    }
+  }
+}

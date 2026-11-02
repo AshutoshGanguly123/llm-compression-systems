@@ -1,0 +1,9 @@
+prompt: "What is the capital of France?"
+max_generated_tokens: 32
+temperature: 0.0
+top_p: 0.08
+top_k: 32
+warmup_runs: 0
+num_runs: 1
+verify_correctness: true
+verbose: true

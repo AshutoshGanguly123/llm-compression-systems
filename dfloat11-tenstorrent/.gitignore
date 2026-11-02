@@ -1,0 +1,36 @@
+# Local Python env (prefer tt-metal's python_env via setup_env.sh)
+venv/
+.venv/
+env/
+
+# Generated weights, compressed blobs, metrics, PDFs (recreate locally; not in git)
+outputs/
+
+# C++ build tree — rebuild: bash scripts/build_device_decode.sh
+device_decode/build/
+
+# Python / tooling
+__pycache__/
+*.py[cod]
+*.pyc
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Secrets
+.env
+*.pem
+
+# Local tt-metal / runtime dumps (regenerate on your machine)
+generated/
