@@ -1,54 +1,71 @@
 # llm-compression-systems
 
-Experiments on **efficient LLM weight representation and serving paths**: (1) FP16 mantissa sensitivity under lm-eval, (2) DFloat11-style Huffman exponent coding on Tenstorrent / TT-Metal with bit-exact reconstruct and host-decode latency accounting.
+Measurement-first work on **efficient LLM weight representation and serving paths**: FP16 mantissa sensitivity under lm-eval, and a DFloat11-style Huffman path on Tenstorrent / TT-Metal.
 
 **Author:** Ashutosh Ganguly — AI researcher @ MBZUAI.
 
-## Tracks
+## Systems claim
 
-| Track | Path | What it measures |
-|-------|------|------------------|
-| FP16 mantissa ablation | [`fp16-mantissa-sensitivity/`](fp16-mantissa-sensitivity/) | Accuracy vs mantissa LSBs zeroed (Llama 3.1 8B) |
-| DFloat11 on Tenstorrent | [`dfloat11-tenstorrent/`](dfloat11-tenstorrent/) | Offline Huffman compress → host decode → TT upload → linear compute |
+Compression is only useful if the **full path** wins:
 
-## Headline results
+**compressed storage → decode → host/device transfer → model compute → user-visible latency**
 
-**Mantissa (lm-eval):** ≤5 bits zeroed ≈ baseline; 8 bits hurts hellaswag (~−11%); 9 bits collapses (~−45% hellaswag). See track README.
+This repo measures that path on a Tenstorrent PoC and separately maps how many FP16 mantissa bits you can drop before quality collapses.
 
-**DFloat11 TT PoC (`lm_head`):**
+## Track A — DFloat11 / Tenstorrent (`dfloat11-tenstorrent/`)
 
-| Metric | Value |
-|--------|------:|
-| Compression ratio | **1.509×** (33.7% size reduction) |
-| Exponent compression | **3.07×** (19 unique exponents) |
-| Bit-exact reconstruction | PASS |
-| TT output equivalence | PASS (baseline == compressed) |
-| TT op time baseline / compressed | 1.41 ms / 1.37 ms |
-| Host decode (Python Huffman, 262M elems) | ~115 s |
+Offline Huffman coding of low-entropy BF16 exponents → host decode → `ttnn` upload → linear compute.
+
+| Metric | Value | Takeaway |
+|--------|------:|----------|
+| Compression ratio | **1.509×** (33.7% smaller) | Real size win on `lm_head` |
+| Exponent compression | **3.07×** | Exponent entropy is the lever |
+| Bit-exact reconstruction | **PASS** | No silent numeric drift |
+| TT output equivalence | **PASS** | Compressed path == baseline compute |
+| TT op time (base / compressed) | 1.41 ms / 1.37 ms | Device compute not the bottleneck |
+| **Host Huffman decode (262M elems)** | **~115 s** | **Dominant cost today** |
+
+**Sell the judgment, not just the ratio:** until decode is accelerated or amortized across many inferences, compression can *lose* end-to-end even when ratios look good. That bottleneck is the RE3 systems question this PoC surfaces.
+
+## Track B — FP16 mantissa cliff (`fp16-mantissa-sensitivity/`)
+
+Zero N LSBs of FP16 mantissas in **Llama 3.1 8B Instruct**; evaluate hellaswag / piqa / arc_easy / winogrande / boolq.
+
+| Bits zeroed | hellaswag | Story |
+|------------:|----------:|-------|
+| 0 (baseline) | 0.598 | — |
+| 5 | 0.595 | ≈ free |
+| 8 | 0.531 (**−11%**) | quality cliff begins |
+| 9 | 0.326 (**−45%**) | collapse |
+
+**Practical read:** several mantissa bits are accuracy-idle on short English benchmarks; the cliff is sharp past ~8 bits. This is an ablation, not a deployable codec.
 
 ## Method (short)
 
-1. **Mantissa:** clear N LSBs of FP16 mantissa in weights; evaluate hellaswag, piqa, arc_easy, winogrande, boolq.
-2. **DFloat11 TT:** split BF16 into sign/exponent/mantissa; Huffman-code low-entropy exponents; decode on host CPU; `ttnn.from_torch` + `ttnn.linear`; compare metrics JSON.
+1. Mantissa: in-place LSB clear + EleutherAI lm-eval.
+2. DFloat11 TT: split BF16 → Huffman exponents → Python host decode → `ttnn.from_torch` + `ttnn.linear` → metrics JSON.
 
 ## Reproducibility
 
-Each track has its own `requirements.txt` / `setup_env.sh` and scripts. Model weights are **not** committed (HF cache / TT artifacts regenerated locally).
+Each track has its own requirements / setup scripts. Weights and TT artifacts are **not** committed.
 
-## Limitations / non-claims
+## Limitations
 
-- Host-side Python Huffman decode is the bottleneck; not a production GPU/TT device kernel.
-- Not a full-model MoE compression + streaming serving stack yet — this repo is measurement-first systems research.
-- Mantissa study ≠ deployment codec; DFloat path is a PoC for bit-exact TT compute after decode.
-- Numbers are from specific hardware/software pins documented in each track; expect variance across boards/drivers.
+- Host-side Python Huffman decode is a PoC — not a production GPU/TT kernel.
+- Not yet a full-model MoE + streaming serving stack with TTFT / tok/s bakeoffs.
+- Mantissa study ≠ deployment format; TT numbers are board/driver specific.
 
-## Layout
+## RE3 roadmap
 
-```
-fp16-mantissa-sensitivity/   # ablation + committed summary JSON + plots
-dfloat11-tenstorrent/        # TT DFloat11 PoC (code, tests, docs)
-```
+1. Accelerate decode (C++/CUDA/TT-Metal) or pipeline decode with compute.
+2. Measure **load time, peak host/device memory, TTFT, sustained tok/s** vs BF16/FP8 baselines.
+3. Chart when compression becomes net-positive after amortization.
+4. Extend beyond single-op `lm_head` to full generative paths.
+
+## Reference papers
+
+[`reference_research_papers/`](reference_research_papers/)
 
 ## License
 
-MIT (see `LICENSE`). Upstream model/dataset licenses still apply to downloaded assets.
+MIT. Upstream model licenses apply to downloaded weights.
