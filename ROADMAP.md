@@ -1,4 +1,4 @@
-# ROADMAP — toward an end-to-end systems result
+# Roadmap — end-to-end systems measurements
 
 ## Goal
 
@@ -6,10 +6,10 @@ Show when DFloat11-style (or mantissa-truncated) weights improve **user-visible*
 
 ## Next measurements
 
-1. Load time (cold start) with/without compressed artifacts.
+1. Cold-start load time with/without compressed artifacts.
 2. Peak host RAM and device memory during decode + upload + compute.
 3. Time to first token and sustained tokens/s on a fixed prompt set.
-4. Break-even curve: number of inferences needed to amortize the ~115 s host decode (current PoC).
+4. Break-even: how many inferences amortize the ~115 s host decode in the current PoC.
 
 ## Next engineering
 
@@ -17,9 +17,4 @@ Show when DFloat11-style (or mantissa-truncated) weights improve **user-visible*
 2. Overlap decode of layer *i+1* with compute of layer *i*.
 3. Hook compressed linear into a full TT generative demo once baseline decode is stable.
 
-No fabricated numbers — land measurements in `dfloat11-tenstorrent/` reports when run.
-
-
-## Instrumentation landed
-
-See `measurements/E2E_PROTOCOL.md` and `measurements/e2e_benchmark.py`. Replace the host stub with real Huffman decode on TT nodes; do not quote scaffold timings as production results.
+Land numbers in `dfloat11-tenstorrent/` when run. Scaffold: `measurements/E2E_PROTOCOL.md`.
