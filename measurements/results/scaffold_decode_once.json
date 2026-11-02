@@ -1,0 +1,34 @@
+{
+  "scenario": "decode_once",
+  "hardware": "host_scaffold",
+  "stages": [
+    {
+      "stage": "load_stub",
+      "wall_s": 1.119915395975113e-06,
+      "tracemalloc_peak_mb": 0.0,
+      "rss_peak_mb": 12.11328125,
+      "result": {
+        "ok": true
+      }
+    },
+    {
+      "stage": "decode",
+      "wall_s": 0.0009568750392645597,
+      "tracemalloc_peak_mb": 1.907517433166504,
+      "rss_peak_mb": 12.11328125,
+      "result": {
+        "elems": 2000000
+      }
+    },
+    {
+      "stage": "transfer",
+      "status": "skipped_no_tt"
+    },
+    {
+      "stage": "compute",
+      "status": "skipped_no_tt"
+    }
+  ],
+  "device_stages": "skipped_no_tt",
+  "note": "Scaffold timings only. Replace fake_decode with df11 Huffman decode and enable TT transfer/compute on a TT node; compare to ~115s PoC on 262M elems."
+}

@@ -62,6 +62,10 @@ Each track has its own requirements / setup scripts. Weights and TT artifacts ar
 3. Chart when compression becomes net-positive after amortization.
 4. Extend beyond single-op `lm_head` to full generative paths.
 
+## E2E measurement harness
+
+Protocol and host scaffold: [`measurements/`](measurements/). TT transfer/compute still require a TT node; do not treat scaffold timings as the 115s PoC replacement.
+
 ## Reference papers
 
 [`reference_research_papers/`](reference_research_papers/)
